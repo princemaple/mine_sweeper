@@ -19,6 +19,8 @@ erl_crash.dump
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
 
+*.gz
+
 # Ignore package tarball (built via "mix hex.build").
 mine_sweeper-*.tar
 
@@ -31,4 +33,3 @@ mine_sweeper-*.tar
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
 /assets/node_modules/
-
