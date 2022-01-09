@@ -1,0 +1,5 @@
+<h2>Show Session</h2>
+
+<%= inspect @session %>
+
+<div class="mt-4"><%= live_redirect "Back", to: Routes.session_index_path(@socket, :index) %></div>

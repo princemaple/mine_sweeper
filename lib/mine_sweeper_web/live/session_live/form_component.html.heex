@@ -1,0 +1,24 @@
+<div class="flex flex-col gap-4">
+  <b><%= @title %></b>
+
+  <form
+    id="session-form"
+    class="flex flex-col gap-4"
+    phx-target={@myself}
+    phx-submit="start">
+
+    <label for="slug">
+      Room Slug <br>
+      <input id="slug" type="text" name="session[slug]" placeholder="leave blank to auto generate">
+    </label>
+
+    <label for="password">
+      Password <br>
+      <input id="password" type="password" name="session[password]" placeholder="leave blank if public">
+    </label>
+  
+    <div>
+      <%= submit "Save", phx_disable_with: "Saving..." %>
+    </div>
+  </form>
+</div>

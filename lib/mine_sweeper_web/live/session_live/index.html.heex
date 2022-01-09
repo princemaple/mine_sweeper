@@ -1,0 +1,35 @@
+<h2>Listing Sessions</h2>
+
+<%= if @live_action in [:new, :edit] do %>
+  <.modal return_to={Routes.session_index_path(@socket, :index)}>
+    <.live_component
+      module={MineSweeperWeb.SessionLive.FormComponent}
+      id={@session.id || :new}
+      title={@page_title}
+      action={@live_action}
+      session={@session}
+      return_to={Routes.session_index_path(@socket, :index)}
+    />
+  </.modal>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Game ID</th>
+    </tr>
+  </thead>
+  <tbody id="sessions">
+    <%= for {session, slug} <- @sessions do %>
+      <tr id={"session-#{slug}"}>
+        <td><%= slug %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: "/sessions/#{slug}" %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div class="mt-4"><%= live_patch "New Session", to: Routes.session_index_path(@socket, :new) %></div>

@@ -18,6 +18,10 @@ defmodule MineSweeperWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+
+    live "/sessions", SessionLive.Index, :index
+    live "/sessions/new", SessionLive.Index, :new
+    live "/sessions/:id", SessionLive.Show, :show
   end
 
   if Mix.env() in [:dev, :test] do
