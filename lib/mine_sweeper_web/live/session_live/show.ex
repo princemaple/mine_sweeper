@@ -27,7 +27,7 @@ defmodule MineSweeperWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_info({:update, coords, data}, socket) do
-    {:noreply, assign(socket, :buster, Map.put(socket.assigns.buster, coords, data))}
+  def handle_info({:update, coords}, socket) do
+    {:noreply, assign(socket, :buster, Map.update(socket.assigns.buster, coords, 1, &(&1 + 1)))}
   end
 end

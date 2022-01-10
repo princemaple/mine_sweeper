@@ -42,8 +42,8 @@ defmodule MineSweeper.CellServer do
 
   @impl true
   def handle_call(:mark, _from, state) do
+    update(state)
     data = %{state.data | marked?: !state.data.marked?}
-    update(state, data)
     {:reply, data, %{state | data: data}}
   end
 
@@ -80,10 +80,10 @@ defmodule MineSweeper.CellServer do
   end
 
   defp do_reveal(state) do
+    update(state)
+
     data = %{state.data | revealed?: true}
     {row, col} = state.coords
-
-    update(state, data)
 
     if data.value == 0 do
       for dr <- -1..1//1, dc <- -1..1//1 do
@@ -95,7 +95,7 @@ defmodule MineSweeper.CellServer do
     data
   end
 
-  defp update(state, data) do
-    Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, {:update, state.coords, data})
+  defp update(state) do
+    Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, {:update, state.coords})
   end
 end
