@@ -9,11 +9,11 @@ defmodule MineSweeperWeb.SessionLive.FormComponent do
 
   defp save_session(socket, :new, session_params) do
     case Game.create_session(session_params) do
-      {:ok, _session} ->
+      {:ok, slug} ->
         {:noreply,
          socket
          |> put_flash(:info, "Session created successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+         |> push_redirect(to: Routes.session_show_path(socket, :show, slug))}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :warn, "Failed to create session")}

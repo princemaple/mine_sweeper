@@ -1,5 +1,21 @@
 <h2>Show Session</h2>
 
-<%= inspect @session %>
+<table>
+<%= for row <- 1..@height do %>
+  <tr>
+  <%= for col <- 1..@width do %>
+    <td>
+      <.live_component
+        id={"#{@slug}-#{row}-#{col}"}
+        module={MineSweeperWeb.SessionLive.CellComponent}
+        slug={@slug}
+        coords={{row, col}}
+        version={@buster[{row, col}]}
+      />
+    </td>
+  <% end %>
+  </tr>
+<% end %>
+</table>
 
 <div class="mt-4"><%= live_redirect "Back", to: Routes.session_index_path(@socket, :index) %></div>

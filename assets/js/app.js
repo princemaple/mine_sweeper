@@ -22,13 +22,39 @@ import {Socket} from 'phoenix';
 import {LiveSocket} from 'phoenix_live_view';
 import topbar from '../vendor/topbar';
 
+const hooks = {};
+
+hooks.CellButton = {
+  mounted() {
+    this.el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.cancelBubble = true;
+      return false;
+    });
+    this.el.addEventListener('mouseup', e => {
+      if (e.button == 0) {
+        this.pushEventTo(e.target.attributes.getNamedItem('phx-target').value, 'reveal');
+      }
+    });
+    this.el.addEventListener('mousedown', e => {
+      if (e.buttons == 2) {
+        this.pushEventTo(e.target.attributes.getNamedItem('phx-target').value, 'mark');
+      }
+      if (e.buttons == 3) {
+        this.pushEventTo(e.target.attributes.getNamedItem('phx-target').value, 'detect');
+      }
+    });
+  },
+};
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute('content');
-let liveSocket = new LiveSocket('/live', Socket, {params: {_csrf_token: csrfToken}});
+let liveSocket = new LiveSocket('/live', Socket, {hooks, params: {_csrf_token: csrfToken}});
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: '#29d'}, shadowColor: 'rgba(0, 0, 0, .3)'});
-window.addEventListener('phx:page-loading-start', info => topbar.show());
-window.addEventListener('phx:page-loading-stop', info => topbar.hide());
+window.addEventListener('phx:page-loading-start', () => topbar.show());
+window.addEventListener('phx:page-loading-stop', () => topbar.hide());
 
 // connect if there are any LiveViews on the page
 liveSocket.connect();

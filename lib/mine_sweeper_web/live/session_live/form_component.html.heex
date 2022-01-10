@@ -1,11 +1,38 @@
 <div class="flex flex-col gap-4">
-  <b><%= @title %></b>
+  <b class="text-xl"><%= @title %></b>
 
   <form
     id="session-form"
     class="flex flex-col gap-4"
     phx-target={@myself}
     phx-submit="start">
+    <div class="flex gap-4 items-center">
+      <b>Difficulty</b>
+      <label for="easy" class="flex gap-2">
+        <input id="easy" type="radio" name="session[difficulty]" value="easy" checked>
+        Easy
+      </label>
+      <label for="medium" class="flex gap-2">
+        <input id="medium" type="radio" name="session[difficulty]" value="medium">
+        Medium
+      </label>
+      <label for="hard" class="flex gap-2">
+        <input id="hard" type="radio" name="session[difficulty]" value="hard">
+        Hard
+      </label>
+    </div>
+
+    <div class="flex gap-4 items-center">
+      <b>Visibility</b>
+      <label for="public" class="flex gap-2">
+        <input id="public" type="radio" name="session[visibility]" value="public" checked>
+        Public
+      </label>
+      <label for="private" class="flex gap-2">
+        <input id="private" type="radio" name="session[visibility]" value="private">
+        Private
+      </label>
+    </div>
 
     <label for="slug">
       Room Slug <br>

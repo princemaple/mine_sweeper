@@ -1,7 +1,7 @@
 defmodule MineSweeperWeb.SessionLive.Show do
   use MineSweeperWeb, :live_view
 
-  alias MineSweeper.Game
+  alias MineSweeper.{Game, GameServer}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -9,13 +9,25 @@ defmodule MineSweeperWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
+  def handle_params(%{"id" => slug}, _, socket) do
+    session = Game.get_session!(slug)
+
+    Phoenix.PubSub.subscribe(MineSweeper.PubSub, slug)
+
+    {width, height} = GameServer.dimension(session)
+
     {:noreply,
      socket
-     |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:session, Game.get_session!(id))
-     |> assign(:id, id)}
+     |> assign(:session, session)
+     |> assign(:width, width)
+     |> assign(:height, height)
+     |> assign(:slug, slug)
+     |> assign(:page_title, slug)
+     |> assign(:buster, %{})}
   end
 
-  defp page_title(:show), do: "Game Session"
+  @impl true
+  def handle_info({:update, coords, data}, socket) do
+    {:noreply, assign(socket, :buster, Map.put(socket.assigns.buster, coords, data))}
+  end
 end
