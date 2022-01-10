@@ -43,25 +43,11 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
     {:noreply, socket}
   end
 
-  def show(%{revealed?: true, value: :mine}) do
-    "💣"
-  end
-
-  def show(%{revealed?: true, value: 0}) do
-    " "
-  end
-
-  def show(%{revealed?: true, value: v}) do
-    v
-  end
-
-  def show(%{revealed?: false, marked?: true}) do
-    "🚩"
-  end
-
-  def show(%{revealed?: false}) do
-    " "
-  end
+  def show(%{revealed?: true, value: :mine}), do: "💣"
+  def show(%{revealed?: true, value: 0}), do: " "
+  def show(%{revealed?: true, value: v}), do: v
+  def show(%{revealed?: false, marked?: true}), do: "🚩"
+  def show(%{revealed?: false}), do: " "
 
   @color List.to_tuple(~w(
            text-transparent
