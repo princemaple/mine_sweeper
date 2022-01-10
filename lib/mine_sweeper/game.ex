@@ -8,8 +8,7 @@ defmodule MineSweeper.Game do
   end
 
   def get_session!(slug) do
-    [{game, _}] = Registry.lookup(GameRegistry, {:game, slug})
-    game
+    Registry.whereis_name({GameRegistry, {:game, slug}})
   end
 
   @difficulty %{

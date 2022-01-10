@@ -4,9 +4,8 @@ defmodule MineSweeper.GameServer do
   require Logger
 
   def start_link(opts) do
-    {name, opts} = Keyword.pop(opts, :name)
-    name = if name, do: [name: name], else: []
-    GenServer.start(__MODULE__, opts, name)
+    slug = Keyword.fetch!(opts, :slug)
+    GenServer.start(__MODULE__, opts, name: {:via, Registry, {GameRegistry, {:game, slug}}})
   end
 
   def dimension(server) do
@@ -23,7 +22,6 @@ defmodule MineSweeper.GameServer do
     {visibility, opts} = Keyword.pop(opts, :visibility)
 
     Registry.register(RealmRegistry, visibility, slug)
-    Registry.register(GameRegistry, {:game, slug}, [])
 
     {:ok, %{opts: opts, slug: slug}, {:continue, :init_game}}
   end
