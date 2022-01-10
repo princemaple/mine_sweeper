@@ -14,7 +14,8 @@ defmodule MineSweeper.Game do
   @difficulty %{
     "easy" => {10, 8, 10},
     "medium" => {18, 14, 40},
-    "hard" => {24, 20, 99}
+    "hard" => {24, 20, 99},
+    "extreme" => {30, 22, 145}
   }
 
   def create_session(%{
