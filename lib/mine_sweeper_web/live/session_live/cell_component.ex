@@ -62,4 +62,27 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
   def show(%{revealed?: false}) do
     " "
   end
+
+  @color List.to_tuple(~w(
+           text-transparent
+           text-blue-600
+           text-green-600
+           text-red-600
+           text-purple-600
+           text-red-900
+           text-teal-400
+           text-black-600
+           text-gray-600
+           ))
+  def class(%{revealed?: revealed?, marked?: marked?, value: value}) do
+    [
+      marked? && "bg-yellow-200",
+      revealed? && "bg-blue-200",
+      revealed? && value == :mine && "bg-red-200",
+      revealed? && value == 0 && "bg-gray-100",
+      is_integer(value) && elem(@color, value)
+    ]
+    |> Enum.filter(& &1)
+    |> Enum.join(" ")
+  end
 end

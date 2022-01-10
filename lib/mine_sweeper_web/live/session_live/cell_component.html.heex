@@ -1,8 +1,7 @@
 <button
   class={"""
     w-12 h-12 rounded border-0 text-2xl
-    #{@cell.revealed? && "bg-blue-200"}
-    #{@cell.revealed? && @cell.value == :mine && "bg-red-200"}
+    #{class(@cell)}
   """}
   phx-hook="CellButton"
   phx-target={@myself}>
