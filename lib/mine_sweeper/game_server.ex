@@ -30,9 +30,9 @@ defmodule MineSweeper.GameServer do
   def handle_continue(:init_game, state) do
     Logger.debug(init: state.slug, opts: state.opts)
 
-    width = state.opts[:width] || 10
-    height = state.opts[:height] || 8
-    count = state.opts[:count] || 10
+    width = state.opts[:width]
+    height = state.opts[:height]
+    count = state.opts[:count]
 
     field =
       for row <- 1..height, col <- 1..width do
