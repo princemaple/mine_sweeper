@@ -10,6 +10,7 @@ defmodule MineSweeper.Application do
       {Phoenix.PubSub, name: MineSweeper.PubSub},
       {Registry, name: RealmRegistry, keys: :duplicate},
       {Registry, name: GameRegistry, keys: :unique},
+      {DynamicSupervisor, strategy: :one_for_one, name: GameSupervisor},
       MineSweeperWeb.Endpoint
     ]
 

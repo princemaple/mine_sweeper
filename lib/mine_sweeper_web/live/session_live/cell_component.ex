@@ -1,30 +1,28 @@
 defmodule MineSweeperWeb.SessionLive.CellComponent do
   use MineSweeperWeb, :live_component
 
-  alias MineSweeper.{Game, CellServer}
+  alias MineSweeper.CellServer
 
   @impl true
   def update(%{slug: slug, coords: coords}, socket) do
-    cell_server = Game.get_cell!(slug, coords)
-    cell = CellServer.get(cell_server)
+    cell = CellServer.get(CellServer.via(slug, coords))
 
     {:ok,
      socket
      |> assign(:slug, slug)
      |> assign(:coords, coords)
-     |> assign(:cell, cell)
-     |> assign(:cell_server, cell_server)}
+     |> assign(:cell, cell)}
   end
 
   @impl true
-  def handle_event("reveal", _payload, socket) do
-    cell = CellServer.reveal(socket.assigns.cell_server)
+  def handle_event("reveal", _payload, %{assigns: %{slug: slug, coords: coords}} = socket) do
+    cell = CellServer.reveal(CellServer.via(slug, coords))
     {:noreply, socket |> assign(:cell, cell)}
   end
 
   @impl true
-  def handle_event("mark", _payload, socket) do
-    cell = CellServer.mark(socket.assigns.cell_server)
+  def handle_event("mark", _payload, %{assigns: %{slug: slug, coords: coords}} = socket) do
+    cell = CellServer.mark(CellServer.via(slug, coords))
     {:noreply, socket |> assign(:cell, cell)}
   end
 
@@ -62,12 +60,12 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
            ))
   def class(%{revealed?: revealed?, marked?: marked?, opaque?: opaque?, value: value}) do
     [
-      "bg-gray-200",
+      !revealed? && "bg-gray-200",
       revealed? && "cursor-default",
-      revealed? && "!bg-blue-200",
-      revealed? && value == :mine && "!bg-red-200",
-      revealed? && value == 0 && "!bg-gray-100",
-      marked? && "!bg-yellow-200",
+      revealed? && "bg-blue-200",
+      revealed? && value == :mine && "bg-red-200",
+      revealed? && value == 0 && "bg-gray-100",
+      marked? && "bg-yellow-200",
       opaque? && "blur-sm",
       is_integer(value) && elem(@color, value)
     ]

@@ -1,5 +1,7 @@
 <h2>Game <%= @slug %></h2>
 
+<%= @time %> (Terminate at <%= @time_limit %>)
+
 <table>
 <%= for row <- 1..@height do %>
   <tr>

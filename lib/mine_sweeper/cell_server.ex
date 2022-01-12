@@ -1,12 +1,15 @@
 defmodule MineSweeper.CellServer do
   use GenServer, restart: :temporary
 
+  alias MineSweeper.GameServer
   require Logger
 
+  def via(slug, coords) do
+    {:via, Registry, {GameRegistry, {:cell, slug, coords}}}
+  end
+
   def start_link({slug, {coords, _}} = data) do
-    GenServer.start(__MODULE__, data,
-      name: {:via, Registry, {GameRegistry, {:cell, slug, coords}}}
-    )
+    GenServer.start_link(__MODULE__, data, name: via(slug, coords))
   end
 
   def get(cell) do
@@ -50,7 +53,7 @@ defmodule MineSweeper.CellServer do
 
   @impl true
   def handle_call(:mark, _from, state) do
-    update(state)
+    broadcast_update(state)
     data = %{state.data | marked?: !state.data.marked?}
     {:reply, data, %{state | data: data}}
   end
@@ -88,7 +91,7 @@ defmodule MineSweeper.CellServer do
   end
 
   defp do_reveal(state, type) do
-    update(state)
+    broadcast_update(state)
 
     case {type, state.data.value} do
       {:chain, 0} ->
@@ -106,9 +109,8 @@ defmodule MineSweeper.CellServer do
         end)
 
         Task.start(fn ->
-          MineSweeper.GameServer.hide({:via, Registry, {GameRegistry, {:game, state.slug}}})
-          Process.sleep(5000)
-          GenServer.stop({:via, Registry, {GameRegistry, {:game, state.slug}}})
+          MineSweeper.GameServer.hide(GameServer.via(state.slug))
+          :ok = GenServer.stop(GameServer.via(state.slug), :normal, 5000)
         end)
 
         %{state.data | revealed?: true}
@@ -133,14 +135,11 @@ defmodule MineSweeper.CellServer do
     {row, col} = state.coords
 
     for dr <- -1..1//1, dc <- -1..1//1 do
-      reveal(
-        {:via, Registry, {GameRegistry, {:cell, state.slug, {row + dr, col + dc}}}},
-        type
-      )
+      reveal(via(state.slug, {row + dr, col + dc}), type)
     end
   end
 
-  defp update(state) do
+  defp broadcast_update(state) do
     Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, {:update, state.coords})
   end
 end

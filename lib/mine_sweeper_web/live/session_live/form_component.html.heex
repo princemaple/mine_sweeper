@@ -48,12 +48,6 @@
         placeholder="leave blank to auto generate">
     </label>
 
-    <label class="flex items-center" for="password">
-      <b class="inline-block min-w-[100px]">Password</b>
-      <input id="password" class="flex-auto" type="password" name="session[password]"
-         placeholder="leave blank if anyone who has the link can join">
-    </label>
-  
     <div>
       <%= submit "Create", phx_disable_with: "Saving..." %>
     </div>
