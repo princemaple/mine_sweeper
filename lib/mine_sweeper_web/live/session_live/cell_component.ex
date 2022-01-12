@@ -60,12 +60,15 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
            text-black-600
            text-gray-600
            ))
-  def class(%{revealed?: revealed?, marked?: marked?, value: value}) do
+  def class(%{revealed?: revealed?, marked?: marked?, opaque?: opaque?, value: value}) do
     [
-      marked? && "bg-yellow-200",
-      revealed? && "bg-blue-200",
-      revealed? && value == :mine && "bg-red-200",
-      revealed? && value == 0 && "bg-gray-100",
+      "bg-gray-200",
+      revealed? && "cursor-default",
+      revealed? && "!bg-blue-200",
+      revealed? && value == :mine && "!bg-red-200",
+      revealed? && value == 0 && "!bg-gray-100",
+      marked? && "!bg-yellow-200",
+      opaque? && "blur-sm",
       is_integer(value) && elem(@color, value)
     ]
     |> Enum.filter(& &1)

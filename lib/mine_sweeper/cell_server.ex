@@ -17,6 +17,14 @@ defmodule MineSweeper.CellServer do
     GenServer.call(cell, :reveal)
   end
 
+  defp reveal(cell, :chain) do
+    GenServer.cast(cell, :chain)
+  end
+
+  defp reveal(cell, :death) do
+    GenServer.cast(cell, :death)
+  end
+
   def mark(cell) do
     GenServer.call(cell, :mark)
   end
@@ -27,7 +35,7 @@ defmodule MineSweeper.CellServer do
 
   @impl true
   def init({slug, {coords, data}}) do
-    {:ok, %{slug: slug, coords: coords, data: data}}
+    {:ok, %{slug: slug, coords: coords, data: Map.put(data, :opaque?, false)}}
   end
 
   @impl true
@@ -54,7 +62,7 @@ defmodule MineSweeper.CellServer do
 
   @impl true
   def handle_call(:reveal, _from, state) do
-    data = do_reveal(state)
+    data = do_reveal(state, :chain)
     {:reply, data, %{state | data: data}}
   end
 
@@ -64,35 +72,72 @@ defmodule MineSweeper.CellServer do
   end
 
   @impl true
-  def handle_info(:reveal, %{data: %{marked?: true}} = state) do
+  def handle_cast(:chain, %{data: %{marked?: true}} = state) do
     {:noreply, state}
   end
 
   @impl true
-  def handle_info(:reveal, %{data: %{revealed?: true}} = state) do
+  def handle_cast(type, %{data: %{revealed?: true}} = state) when type in [:chain, :death] do
     {:noreply, state}
   end
 
   @impl true
-  def handle_info(:reveal, state) do
-    data = do_reveal(state)
+  def handle_cast(type, state) when type in [:chain, :death] do
+    data = do_reveal(state, type)
     {:noreply, %{state | data: data}}
   end
 
-  defp do_reveal(state) do
+  defp do_reveal(state, type) do
     update(state)
 
-    data = %{state.data | revealed?: true}
+    case {type, state.data.value} do
+      {:chain, 0} ->
+        Task.start(fn ->
+          Process.sleep(30)
+          chain(state, :chain)
+        end)
+
+        %{state.data | revealed?: true}
+
+      {:chain, :mine} ->
+        Task.start(fn ->
+          Process.sleep(30)
+          chain(state, :death)
+        end)
+
+        Task.start(fn ->
+          MineSweeper.GameServer.hide({:via, Registry, {GameRegistry, {:game, state.slug}}})
+          Process.sleep(5000)
+          GenServer.stop({:via, Registry, {GameRegistry, {:game, state.slug}}})
+        end)
+
+        %{state.data | revealed?: true}
+
+      {:death, _} ->
+        Task.start(fn ->
+          Process.sleep(30)
+          chain(state, :death)
+        end)
+
+        %{state.data | revealed?: true, opaque?: true}
+
+      {:chain, _n} ->
+        %{state.data | revealed?: true}
+
+      _ ->
+        %{state.data | revealed?: false}
+    end
+  end
+
+  defp chain(state, type) do
     {row, col} = state.coords
 
-    if data.value == 0 do
-      for dr <- -1..1//1, dc <- -1..1//1 do
-        pid = Registry.whereis_name({GameRegistry, {:cell, state.slug, {row + dr, col + dc}}})
-        Process.send_after(pid, :reveal, 30)
-      end
+    for dr <- -1..1//1, dc <- -1..1//1 do
+      reveal(
+        {:via, Registry, {GameRegistry, {:cell, state.slug, {row + dr, col + dc}}}},
+        type
+      )
     end
-
-    data
   end
 
   defp update(state) do

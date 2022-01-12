@@ -12,8 +12,8 @@ defmodule MineSweeper.GameServer do
     GenServer.call(server, :dimension)
   end
 
-  def field(server) do
-    GenServer.call(server, :field)
+  def hide(server) do
+    GenServer.call(server, :hide)
   end
 
   @impl true
@@ -83,7 +83,8 @@ defmodule MineSweeper.GameServer do
   end
 
   @impl true
-  def handle_call(:field, _from, %{opts: opts} = state) do
-    {:reply, {opts[:width], opts[:height]}, state}
+  def handle_call(:hide, _from, state) do
+    Registry.unregister(RealmRegistry, :public)
+    {:reply, :ok, state}
   end
 end

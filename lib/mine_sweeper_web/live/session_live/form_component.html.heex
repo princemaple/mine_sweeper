@@ -7,57 +7,55 @@
     phx-target={@myself}
     phx-submit="start">
     <div class="flex gap-4 items-center">
-      <b>Difficulty</b>
-
-      <label for="easy" class="flex gap-2">
+      <b class="inline-block min-w-[100px]">Difficulty</b>
+      <label for="easy">
         <input id="easy" type="radio" name="session[difficulty]" value="easy" checked>
         Easy
       </label>
 
-      <label for="medium" class="flex gap-2">
+      <label for="medium">
         <input id="medium" type="radio" name="session[difficulty]" value="medium">
         Medium
       </label>
 
-      <label for="hard" class="flex gap-2">
+      <label for="hard">
         <input id="hard" type="radio" name="session[difficulty]" value="hard">
         Hard
       </label>
 
-      <label for="extreme" class="flex gap-2">
+      <label for="extreme">
         <input id="extreme" type="radio" name="session[difficulty]" value="extreme">
         Extreme
       </label>
     </div>
 
     <div class="flex gap-4 items-center">
-      <b>Visibility</b>
-
-      <label for="public" class="flex gap-2">
+      <b class="inline-block min-w-[100px]">Visibility</b>
+      <label for="public">
         <input id="public" type="radio" name="session[visibility]" value="public" checked>
         Public (Listed)
       </label>
 
-      <label for="private" class="flex gap-2">
+      <label for="private">
         <input id="private" type="radio" name="session[visibility]" value="private">
         Private (Share link)
       </label>
     </div>
 
-    <label for="slug">
-      Room Slug <br>
-      <input id="slug" type="text" name="session[slug]"
+    <label class="flex items-center" for="slug">
+      <b class="inline-block min-w-[100px]">Room Slug </b>
+      <input id="slug" class="flex-auto" type="text" name="session[slug]"
         placeholder="leave blank to auto generate">
     </label>
 
-    <label for="password">
-      Password <br>
-      <input id="password" type="password" name="session[password]"
+    <label class="flex items-center" for="password">
+      <b class="inline-block min-w-[100px]">Password</b>
+      <input id="password" class="flex-auto" type="password" name="session[password]"
          placeholder="leave blank if anyone who has the link can join">
     </label>
   
     <div>
-      <%= submit "Save", phx_disable_with: "Saving..." %>
+      <%= submit "Create", phx_disable_with: "Saving..." %>
     </div>
   </form>
 </div>

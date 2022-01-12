@@ -1,11 +1,10 @@
+@tailwind base;
 @tailwind utilities;
-
-/* This file is for your main application CSS */
 
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;
-  margin-bottom: 20px;
+  margin-top: 1em;
   border: 1px solid transparent;
   border-radius: 4px;
 }
@@ -141,7 +140,23 @@
   }
 }
 
-input[type='text'],
-input[type='password'] {
-  width: 280px;
+h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #533566;
+  margin: 1em;
+}
+
+@layer base {
+  a {
+    @apply text-red-400;
+  }
+
+  .phx-modal button {
+    @apply bg-[#533566] text-white p-0 px-2 pb-1 rounded;
+  }
+
+  .phx-modal label {
+    @apply flex items-center gap-2;
+  }
 }
