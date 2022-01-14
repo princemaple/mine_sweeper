@@ -9,7 +9,7 @@
     <span><%= @count %>🚩/<%= @total %>💣</span>
   </div>
 
-  <table>
+  <table class={if @ending, do: "end"}>
   <%= for row <- 1..@height do %>
     <tr>
     <%= for col <- 1..@width do %>
@@ -28,6 +28,10 @@
   </table>
 </div>
 
-<%= if @win do %>
+<%= if @ending == :win do %>
   <span>🎉🎉🎉🥳🎊🥳🎊🥳🎉🎉🎉</span>
+<% end %>
+
+<%= if @ending == :lose do %>
+  <span>😢😢😭😭😿😿😿😭😭😢😢</span>
 <% end %>

@@ -21,15 +21,15 @@ defmodule MineSweeper.GameServer do
   end
 
   def mark(server, diff) do
-    GenServer.call(server, {:mark, diff})
+    GenServer.cast(server, {:mark, diff})
   end
 
   def reveal(server) do
-    GenServer.call(server, :reveal)
+    GenServer.cast(server, :reveal)
   end
 
   def explode(server) do
-    GenServer.call(server, :explode)
+    GenServer.cast(server, :explode)
   end
 
   @impl true
@@ -49,7 +49,8 @@ defmodule MineSweeper.GameServer do
        reveal_count: 0,
        time_limit: time_limit,
        timer_ref: nil,
-       cells_sup: nil
+       cells_sup: nil,
+       mines: nil
      }, {:continue, :init_game}}
   end
 
@@ -111,7 +112,7 @@ defmodule MineSweeper.GameServer do
       DynamicSupervisor.start_child(cells_sup, {MineSweeper.CellServer, {slug, {coords, opts}}})
     end
 
-    %{state | cells_sup: cells_sup}
+    %{state | cells_sup: cells_sup, mines: Enum.map(mines, &elem(&1, 0))}
   end
 
   defp setup_timer(state) do
@@ -135,27 +136,38 @@ defmodule MineSweeper.GameServer do
   end
 
   @impl true
-  def handle_call({:mark, diff}, _from, state) do
+  def handle_cast({:mark, diff}, state) do
     mark_count = state.mark_count + diff
     Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, {:mark_count, mark_count})
-    {:reply, :ok, %{state | mark_count: mark_count}}
+    {:noreply, %{state | mark_count: mark_count}}
   end
 
   @impl true
-  def handle_call(:reveal, _from, state) do
+  def handle_cast(:reveal, state) do
     reveal_count = state.reveal_count + 1
 
     if state.opts[:width] * state.opts[:height] - state.opts[:mine_count] == reveal_count do
       Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, :win)
-      {:stop, :shutdown, :ok, %{state | reveal_count: reveal_count}}
+      {:stop, :shutdown, %{state | reveal_count: reveal_count}}
     else
-      {:reply, :ok, %{state | reveal_count: reveal_count}}
+      {:noreply, %{state | reveal_count: reveal_count}}
     end
   end
 
   @impl true
-  def handle_call(:explode, _from, state) do
-    {:stop, :shutdown, :ok, state}
+  def handle_cast(:explode, state) do
+    Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, :lose)
+
+    state.mines
+    |> Enum.with_index()
+    |> Enum.each(fn {coords, i} ->
+      Task.start(fn ->
+        Process.sleep(100 * i)
+        MineSweeper.CellServer.reveal(MineSweeper.CellServer.via(state.slug, coords))
+      end)
+    end)
+
+    {:stop, :shutdown, state}
   end
 
   @impl true
@@ -173,6 +185,6 @@ defmodule MineSweeper.GameServer do
   @impl true
   def terminate(:shutdown, state) do
     :timer.cancel(state.timer_ref)
-    :timer.kill_after(5000, state.cells_sup)
+    :timer.kill_after(15_000, state.cells_sup)
   end
 end

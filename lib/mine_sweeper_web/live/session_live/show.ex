@@ -5,7 +5,7 @@ defmodule MineSweeperWeb.SessionLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(:win, false)}
+    {:ok, socket |> assign(:ending, nil)}
   end
 
   @impl true
@@ -48,6 +48,11 @@ defmodule MineSweeperWeb.SessionLive.Show do
 
   @impl true
   def handle_info(:win, socket) do
-    {:noreply, assign(socket, :win, true)}
+    {:noreply, assign(socket, :ending, :win)}
+  end
+
+  @impl true
+  def handle_info(:lose, socket) do
+    {:noreply, assign(socket, :ending, :lose)}
   end
 end
