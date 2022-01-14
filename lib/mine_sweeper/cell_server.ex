@@ -54,6 +54,13 @@ defmodule MineSweeper.CellServer do
   @impl true
   def handle_call(:mark, _from, state) do
     broadcast_update(state)
+
+    if state.data.marked? do
+      MineSweeper.GameServer.mark(GameServer.via(state.slug), -1)
+    else
+      MineSweeper.GameServer.mark(GameServer.via(state.slug), 1)
+    end
+
     data = %{state.data | marked?: !state.data.marked?}
     {:reply, data, %{state | data: data}}
   end
@@ -66,6 +73,11 @@ defmodule MineSweeper.CellServer do
   @impl true
   def handle_call(:reveal, _from, state) do
     data = do_reveal(state, :chain)
+
+    if state.data.marked? do
+      MineSweeper.GameServer.mark(GameServer.via(state.slug), -1)
+    end
+
     {:reply, data, %{state | data: data}}
   end
 
@@ -100,7 +112,7 @@ defmodule MineSweeper.CellServer do
           chain(state, :chain)
         end)
 
-        %{state.data | revealed?: true}
+        %{state.data | revealed?: true, marked?: false}
 
       {:chain, :mine} ->
         Task.start(fn ->
@@ -123,7 +135,7 @@ defmodule MineSweeper.CellServer do
         %{state.data | revealed?: true, opaque?: true}
 
       {:chain, _n} ->
-        %{state.data | revealed?: true}
+        %{state.data | revealed?: true, marked?: false}
 
       _ ->
         %{state.data | revealed?: false}

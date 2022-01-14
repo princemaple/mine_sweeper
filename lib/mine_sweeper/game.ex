@@ -23,7 +23,7 @@ defmodule MineSweeper.Game do
         "difficulty" => difficulty,
         "visibility" => visibility
       }) do
-    {width, height, count, time_limit} = Map.fetch!(@difficulty, difficulty)
+    {width, height, mine_count, time_limit} = Map.fetch!(@difficulty, difficulty)
 
     slug =
       if slug in [nil, ""] do
@@ -41,7 +41,7 @@ defmodule MineSweeper.Game do
          slug: slug,
          width: width,
          height: height,
-         count: count,
+         mine_count: mine_count,
          visibility: visibility,
          time_limit: time_limit}
       )

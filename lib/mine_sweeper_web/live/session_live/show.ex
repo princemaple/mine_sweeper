@@ -4,17 +4,12 @@ defmodule MineSweeperWeb.SessionLive.Show do
   alias MineSweeper.{Game, GameServer}
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, socket |> assign(:time, nil)}
-  end
-
-  @impl true
   def handle_params(%{"id" => slug}, _, socket) do
     session = Game.get_session!(slug)
 
     Phoenix.PubSub.subscribe(MineSweeper.PubSub, slug)
 
-    {{width, height}, total} = GameServer.info(session)
+    {{width, height}, time, {count, total}} = GameServer.info(session)
     time_limit = GameServer.time_limit(session)
 
     {:noreply,
@@ -22,6 +17,8 @@ defmodule MineSweeperWeb.SessionLive.Show do
      |> assign(:session, session)
      |> assign(:width, width)
      |> assign(:height, height)
+     |> assign(:time, Time.from_seconds_after_midnight(time))
+     |> assign(:count, count)
      |> assign(:total, total)
      |> assign(:slug, slug)
      |> assign(:page_title, slug)
@@ -32,6 +29,11 @@ defmodule MineSweeperWeb.SessionLive.Show do
   @impl true
   def handle_info({:update, coords}, socket) do
     {:noreply, assign(socket, :buster, Map.update(socket.assigns.buster, coords, 1, &(&1 + 1)))}
+  end
+
+  @impl true
+  def handle_info({:mark_count, count}, socket) do
+    {:noreply, assign(socket, :count, count)}
   end
 
   @impl true

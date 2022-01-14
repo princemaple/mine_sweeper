@@ -20,6 +20,10 @@ defmodule MineSweeper.GameServer do
     GenServer.call(server, :time_limit)
   end
 
+  def mark(server, diff) do
+    GenServer.call(server, {:mark, diff})
+  end
+
   def exit(server) do
     GenServer.call(server, :exit)
   end
@@ -37,6 +41,7 @@ defmodule MineSweeper.GameServer do
        opts: opts,
        slug: slug,
        time: 0,
+       mark_count: 0,
        time_limit: time_limit,
        timer_ref: nil,
        cells_sup: nil
@@ -57,7 +62,7 @@ defmodule MineSweeper.GameServer do
     slug = state.slug
     width = Keyword.fetch!(state.opts, :width)
     height = Keyword.fetch!(state.opts, :height)
-    count = Keyword.fetch!(state.opts, :count)
+    mine_count = Keyword.fetch!(state.opts, :mine_count)
 
     field =
       for row <- 1..height, col <- 1..width do
@@ -67,7 +72,7 @@ defmodule MineSweeper.GameServer do
     {mines, cells} =
       field
       |> Enum.shuffle()
-      |> Enum.split(count)
+      |> Enum.split(mine_count)
 
     field =
       mines
@@ -97,8 +102,8 @@ defmodule MineSweeper.GameServer do
     {:ok, cells_sup} =
       DynamicSupervisor.start_child(GameSupervisor, {DynamicSupervisor, strategy: :one_for_one})
 
-    for {coords, data} <- field do
-      DynamicSupervisor.start_child(cells_sup, {MineSweeper.CellServer, {slug, {coords, data}}})
+    for {coords, opts} <- field do
+      DynamicSupervisor.start_child(cells_sup, {MineSweeper.CellServer, {slug, {coords, opts}}})
     end
 
     %{state | cells_sup: cells_sup}
@@ -111,12 +116,19 @@ defmodule MineSweeper.GameServer do
 
   @impl true
   def handle_call(:info, _from, %{opts: opts} = state) do
-    {:reply, {{opts[:width], opts[:height]}, opts[:count]}, state}
+    {:reply, {{opts[:width], opts[:height]}, state.time, {state.mark_count, opts[:mine_count]}}, state}
   end
 
   @impl true
   def handle_call(:time_limit, _from, state) do
     {:reply, state.time_limit, state}
+  end
+
+  @impl true
+  def handle_call({:mark, diff}, _from, state) do
+    mark_count = state.mark_count + diff
+    Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, {:mark_count, mark_count})
+    {:reply, :ok, %{state | mark_count: mark_count}}
   end
 
   @impl true
