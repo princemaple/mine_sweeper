@@ -45,6 +45,23 @@ hooks.CellButton = {
         this.pushEventTo(e.target.attributes.getNamedItem('phx-target').value, 'detect');
       }
     });
+
+    this.row = parseInt(this.el.dataset['row']);
+    this.col = parseInt(this.el.dataset['col']);
+
+    const isNeighbour = e =>
+      [-1, 0, 1].map(d => d + this.row).includes(e.row) &&
+      [-1, 0, 1].map(d => d + this.col).includes(e.col) &&
+      (e.row != this.row || e.col != this.col);
+
+    this.handleEvent('detect', e => {
+      if (isNeighbour(e)) {
+        this.el.classList.add('shake');
+        setTimeout(() => {
+          this.el.classList.remove('shake');
+        }, 200);
+      }
+    });
   },
 };
 

@@ -16,6 +16,8 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
      socket
      |> assign(:slug, slug)
      |> assign(:coords, coords)
+     |> assign(:row, elem(coords, 0))
+     |> assign(:col, elem(coords, 1))
      |> assign(:version, version)
      |> assign(:cell, cell)}
   end
@@ -40,7 +42,7 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
       )
       when is_integer(value) and value > 0 do
     CellServer.detect(CellServer.via(slug, coords))
-    {:noreply, socket}
+    {:noreply, push_event(socket, "detect", %{row: elem(coords, 0), col: elem(coords, 1)})}
   end
 
   @impl true
@@ -67,7 +69,7 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
            ))
   def class(%{revealed?: revealed?, marked?: marked?, opaque?: opaque?, value: value}) do
     [
-      revealed? && "cursor-default",
+      revealed? && "revealed cursor-default",
       cond do
         marked? -> "bg-yellow-200"
         !revealed? -> "bg-gray-200"

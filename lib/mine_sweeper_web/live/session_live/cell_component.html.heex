@@ -3,6 +3,8 @@
     w-12 h-12 rounded border-0 text-2xl
     #{class(@cell)}
   """}
+  data-row={@row}
+  data-col={@col}
   phx-hook="CellButton"
   phx-target={@myself}>
   <%= show(@cell) %>

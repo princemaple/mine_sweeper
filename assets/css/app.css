@@ -164,3 +164,29 @@ h2 {
     @apply flex items-center gap-2;
   }
 }
+
+.shake:not(.revealed) {
+  animation: 0.2s ease-in-out 0s normal forwards 1 shake;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0);
+  }
+
+  25% {
+    transform: rotate(15deg);
+  }
+
+  50% {
+    transform: rotate(0);
+  }
+
+  75% {
+    transform: rotate(-15deg);
+  }
+
+  100% {
+    transform: rotate(0);
+  }
+}
