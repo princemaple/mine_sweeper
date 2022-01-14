@@ -4,6 +4,11 @@ defmodule MineSweeperWeb.SessionLive.Show do
   alias MineSweeper.{Game, GameServer}
 
   @impl true
+  def mount(_params, _session, socket) do
+    {:ok, socket |> assign(:win, false)}
+  end
+
+  @impl true
   def handle_params(%{"id" => slug}, _, socket) do
     session = Game.get_session!(slug)
 
@@ -39,5 +44,10 @@ defmodule MineSweeperWeb.SessionLive.Show do
   @impl true
   def handle_info({:tick, time}, socket) do
     {:noreply, assign(socket, :time, Time.from_seconds_after_midnight(time))}
+  end
+
+  @impl true
+  def handle_info(:win, socket) do
+    {:noreply, assign(socket, :win, true)}
   end
 end

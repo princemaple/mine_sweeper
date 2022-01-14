@@ -151,42 +151,25 @@ defmodule MineSweeper.CellServer do
 
   defp do_reveal(state, type) do
     broadcast_update(state)
+    MineSweeper.GameServer.reveal(GameServer.via(state.slug))
 
     case {type, state.data.value} do
+      {:chain, :mine} ->
+        Task.start(fn ->
+          MineSweeper.GameServer.explode(GameServer.via(state.slug))
+        end)
+
       {:chain, 0} ->
         Task.start(fn ->
           Process.sleep(30)
           chain(state, :chain)
         end)
 
-        %{state.data | revealed?: true, marked?: false}
-
-      {:chain, :mine} ->
-        Task.start(fn ->
-          Process.sleep(30)
-          chain(state, :death)
-        end)
-
-        Task.start(fn ->
-          MineSweeper.GameServer.exit(GameServer.via(state.slug))
-        end)
-
-        %{state.data | revealed?: true, marked?: false}
-
-      {:death, _} ->
-        Task.start(fn ->
-          Process.sleep(30)
-          chain(state, :death)
-        end)
-
-        %{state.data | revealed?: true, opaque?: true}
-
       {:chain, _n} ->
-        %{state.data | revealed?: true, marked?: false}
-
-      _ ->
-        %{state.data | revealed?: false}
+        :ok
     end
+
+    %{state.data | revealed?: true, marked?: false}
   end
 
   defp chain(state, type) do

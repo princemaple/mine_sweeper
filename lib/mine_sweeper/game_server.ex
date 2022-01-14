@@ -24,8 +24,12 @@ defmodule MineSweeper.GameServer do
     GenServer.call(server, {:mark, diff})
   end
 
-  def exit(server) do
-    GenServer.call(server, :exit)
+  def reveal(server) do
+    GenServer.call(server, :reveal)
+  end
+
+  def explode(server) do
+    GenServer.call(server, :explode)
   end
 
   @impl true
@@ -42,6 +46,7 @@ defmodule MineSweeper.GameServer do
        slug: slug,
        time: 0,
        mark_count: 0,
+       reveal_count: 0,
        time_limit: time_limit,
        timer_ref: nil,
        cells_sup: nil
@@ -137,7 +142,19 @@ defmodule MineSweeper.GameServer do
   end
 
   @impl true
-  def handle_call(:exit, _from, state) do
+  def handle_call(:reveal, _from, state) do
+    reveal_count = state.reveal_count + 1
+
+    if state.opts[:width] * state.opts[:height] - state.opts[:mine_count] == reveal_count do
+      Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, :win)
+      {:stop, :shutdown, :ok, %{state | reveal_count: reveal_count}}
+    else
+      {:reply, :ok, %{state | reveal_count: reveal_count}}
+    end
+  end
+
+  @impl true
+  def handle_call(:explode, _from, state) do
     {:stop, :shutdown, :ok, state}
   end
 
