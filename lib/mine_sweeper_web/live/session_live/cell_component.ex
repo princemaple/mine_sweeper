@@ -4,13 +4,19 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
   alias MineSweeper.CellServer
 
   @impl true
-  def update(%{slug: slug, coords: coords}, socket) do
+  def update(%{version: version}, %{assigns: %{version: version}} = socket) do
+    {:ok, socket}
+  end
+
+  @impl true
+  def update(%{slug: slug, coords: coords, version: version}, socket) do
     cell = CellServer.get(CellServer.via(slug, coords))
 
     {:ok,
      socket
      |> assign(:slug, slug)
      |> assign(:coords, coords)
+     |> assign(:version, version)
      |> assign(:cell, cell)}
   end
 
