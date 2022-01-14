@@ -121,7 +121,6 @@ defmodule MineSweeper.GameServer do
 
   @impl true
   def handle_call(:exit, _from, state) do
-    cleanup(state)
     {:stop, :shutdown, :ok, state}
   end
 
@@ -133,12 +132,12 @@ defmodule MineSweeper.GameServer do
     if time < state.time_limit do
       {:noreply, %{state | time: time}}
     else
-      cleanup(state)
       {:stop, :shutdown, %{state | time: time}}
     end
   end
 
-  defp cleanup(state) do
+  @impl true
+  def terminate(:shutdown, state) do
     Registry.unregister(RealmRegistry, :public)
     :timer.cancel(state.timer_ref)
     :timer.kill_after(5000, state.cells_sup)
