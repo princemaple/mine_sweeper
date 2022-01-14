@@ -54,7 +54,7 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
   def show(%{revealed?: false}), do: " "
 
   @color List.to_tuple(~w(
-           text-transparent
+           text-current
            text-blue-600
            text-green-600
            text-red-600
