@@ -36,9 +36,10 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
   def handle_event(
         "detect",
         _payload,
-        %{assigns: %{cell: %{revealed?: true, value: value}}} = socket
+        %{assigns: %{cell: %{revealed?: true, value: value}, slug: slug, coords: coords}} = socket
       )
       when is_integer(value) and value > 0 do
+    CellServer.detect(CellServer.via(slug, coords))
     {:noreply, socket}
   end
 
