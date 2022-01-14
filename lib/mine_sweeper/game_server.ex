@@ -116,7 +116,12 @@ defmodule MineSweeper.GameServer do
 
   @impl true
   def handle_call(:info, _from, %{opts: opts} = state) do
-    {:reply, {{opts[:width], opts[:height]}, state.time, {state.mark_count, opts[:mine_count]}}, state}
+    {:reply,
+     {
+       {opts[:width], opts[:height]},
+       state.time,
+       {state.mark_count, opts[:mine_count]}
+     }, state}
   end
 
   @impl true
@@ -150,7 +155,6 @@ defmodule MineSweeper.GameServer do
 
   @impl true
   def terminate(:shutdown, state) do
-    Registry.unregister(RealmRegistry, :public)
     :timer.cancel(state.timer_ref)
     :timer.kill_after(5000, state.cells_sup)
   end
