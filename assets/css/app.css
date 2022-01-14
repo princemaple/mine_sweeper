@@ -144,7 +144,7 @@ h2 {
   font-size: 1.5em;
   font-weight: bold;
   color: #533566;
-  margin: 1em;
+  margin: 1em 0;
 }
 
 @layer base {

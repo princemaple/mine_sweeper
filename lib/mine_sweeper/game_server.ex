@@ -12,8 +12,8 @@ defmodule MineSweeper.GameServer do
     GenServer.start_link(__MODULE__, opts, name: via(slug))
   end
 
-  def dimension(server) do
-    GenServer.call(server, :dimension)
+  def info(server) do
+    GenServer.call(server, :info)
   end
 
   def time_limit(server) do
@@ -110,8 +110,8 @@ defmodule MineSweeper.GameServer do
   end
 
   @impl true
-  def handle_call(:dimension, _from, %{opts: opts} = state) do
-    {:reply, {opts[:width], opts[:height]}, state}
+  def handle_call(:info, _from, %{opts: opts} = state) do
+    {:reply, {{opts[:width], opts[:height]}, opts[:count]}, state}
   end
 
   @impl true

@@ -1,23 +1,29 @@
-<h2>Game <%= @slug %></h2>
+<div class="w-min">
+  <div class="flex items-center justify-between">
+    <h2> Game <%= @slug %> </h2>
+    <%= live_redirect "Back to list", to: Routes.session_index_path(@socket, :index) %>
+  </div>
 
-<%= @time %> (Terminate at <%= @time_limit %>)
+  <div class="self-stretch flex justify-between">
+    <span><%= @time %> (Terminate at <%= @time_limit %>)</span>
+    <span>X/<%= @total %> Left</span>
+  </div>
 
-<table>
-<%= for row <- 1..@height do %>
-  <tr>
-  <%= for col <- 1..@width do %>
-    <td>
-      <.live_component
-        id={"#{@slug}-#{row}-#{col}"}
-        module={MineSweeperWeb.SessionLive.CellComponent}
-        slug={@slug}
-        coords={{row, col}}
-        version={@buster[{row, col}]}
-      />
-    </td>
+  <table>
+  <%= for row <- 1..@height do %>
+    <tr>
+    <%= for col <- 1..@width do %>
+      <td>
+        <.live_component
+          id={"#{@slug}-#{row}-#{col}"}
+          module={MineSweeperWeb.SessionLive.CellComponent}
+          slug={@slug}
+          coords={{row, col}}
+          version={@buster[{row, col}]}
+        />
+      </td>
+    <% end %>
+    </tr>
   <% end %>
-  </tr>
-<% end %>
-</table>
-
-<div class="mt-4"><%= live_redirect "Back", to: Routes.session_index_path(@socket, :index) %></div>
+  </table>
+</div>

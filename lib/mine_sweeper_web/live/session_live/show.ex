@@ -14,7 +14,7 @@ defmodule MineSweeperWeb.SessionLive.Show do
 
     Phoenix.PubSub.subscribe(MineSweeper.PubSub, slug)
 
-    {width, height} = GameServer.dimension(session)
+    {{width, height}, total} = GameServer.info(session)
     time_limit = GameServer.time_limit(session)
 
     {:noreply,
@@ -22,6 +22,7 @@ defmodule MineSweeperWeb.SessionLive.Show do
      |> assign(:session, session)
      |> assign(:width, width)
      |> assign(:height, height)
+     |> assign(:total, total)
      |> assign(:slug, slug)
      |> assign(:page_title, slug)
      |> assign(:buster, %{})
