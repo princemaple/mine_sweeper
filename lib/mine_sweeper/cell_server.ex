@@ -124,7 +124,7 @@ defmodule MineSweeper.CellServer do
           MineSweeper.GameServer.exit(GameServer.via(state.slug))
         end)
 
-        %{state.data | revealed?: true}
+        %{state.data | revealed?: true, marked?: false}
 
       {:death, _} ->
         Task.start(fn ->

@@ -66,12 +66,14 @@ defmodule MineSweeperWeb.SessionLive.CellComponent do
            ))
   def class(%{revealed?: revealed?, marked?: marked?, opaque?: opaque?, value: value}) do
     [
-      !revealed? && "bg-gray-200",
       revealed? && "cursor-default",
-      revealed? && "bg-blue-200",
-      revealed? && value == :mine && "bg-red-200",
-      revealed? && value == 0 && "bg-gray-100",
-      marked? && "bg-yellow-200",
+      cond do
+        marked? -> "bg-yellow-200"
+        !revealed? -> "bg-gray-200"
+        revealed? && value == :mine -> "bg-red-200"
+        revealed? && value == 0 -> "bg-gray-100"
+        revealed? -> "bg-blue-200"
+      end,
       opaque? && "blur-sm",
       is_integer(value) && elem(@color, value)
     ]
