@@ -109,8 +109,7 @@ defmodule MineSweeper.CellServer do
         end)
 
         Task.start(fn ->
-          MineSweeper.GameServer.hide(GameServer.via(state.slug))
-          :ok = GenServer.stop(GameServer.via(state.slug), :normal, 5000)
+          MineSweeper.GameServer.exit(GameServer.via(state.slug))
         end)
 
         %{state.data | revealed?: true}

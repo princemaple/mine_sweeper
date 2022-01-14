@@ -20,8 +20,8 @@ defmodule MineSweeper.GameServer do
     GenServer.call(server, :time_limit)
   end
 
-  def hide(server) do
-    GenServer.call(server, :hide)
+  def exit(server) do
+    GenServer.call(server, :exit)
   end
 
   @impl true
@@ -32,25 +32,33 @@ defmodule MineSweeper.GameServer do
 
     Registry.register(RealmRegistry, visibility, slug)
 
-    {:ok, %{opts: opts, slug: slug, time: 0, time_limit: time_limit}, {:continue, :init_game}}
+    {:ok,
+     %{
+       opts: opts,
+       slug: slug,
+       time: 0,
+       time_limit: time_limit,
+       timer_ref: nil,
+       cells_sup: nil
+     }, {:continue, :init_game}}
   end
 
   @impl true
   def handle_continue(:init_game, state) do
     Logger.debug(init: state.slug, opts: state.opts)
 
-    width = state.opts[:width]
-    height = state.opts[:height]
-    count = state.opts[:count]
-
-    setup_field(state.slug, width, height, count)
-    setup_timer()
-
     {:noreply,
-     %{state | opts: Keyword.merge(state.opts, width: width, height: height, count: count)}}
+     state
+     |> setup_field()
+     |> setup_timer()}
   end
 
-  defp setup_field(slug, width, height, count) do
+  defp setup_field(state) do
+    slug = state.slug
+    width = Keyword.fetch!(state.opts, :width)
+    height = Keyword.fetch!(state.opts, :height)
+    count = Keyword.fetch!(state.opts, :count)
+
     field =
       for row <- 1..height, col <- 1..width do
         {{row, col}, %{revealed?: false, marked?: false, value: 0}}
@@ -86,13 +94,19 @@ defmodule MineSweeper.GameServer do
         end
       end)
 
+    {:ok, cells_sup} =
+      DynamicSupervisor.start_child(GameSupervisor, {DynamicSupervisor, strategy: :one_for_one})
+
     for {coords, data} <- field do
-      MineSweeper.CellServer.start_link({slug, {coords, data}})
+      DynamicSupervisor.start_child(cells_sup, {MineSweeper.CellServer, {slug, {coords, data}}})
     end
+
+    %{state | cells_sup: cells_sup}
   end
 
-  defp setup_timer do
-    :timer.send_interval(1000, self(), :tick)
+  defp setup_timer(state) do
+    {:ok, ref} = :timer.send_interval(1000, self(), :tick)
+    %{state | timer_ref: ref}
   end
 
   @impl true
@@ -106,9 +120,9 @@ defmodule MineSweeper.GameServer do
   end
 
   @impl true
-  def handle_call(:hide, _from, state) do
-    Registry.unregister(RealmRegistry, :public)
-    {:reply, :ok, state}
+  def handle_call(:exit, _from, state) do
+    cleanup(state)
+    {:stop, :shutdown, :ok, state}
   end
 
   @impl true
@@ -119,7 +133,14 @@ defmodule MineSweeper.GameServer do
     if time < state.time_limit do
       {:noreply, %{state | time: time}}
     else
-      {:stop, :normal, %{state | time: time}}
+      cleanup(state)
+      {:stop, :shutdown, %{state | time: time}}
     end
+  end
+
+  defp cleanup(state) do
+    Registry.unregister(RealmRegistry, :public)
+    :timer.cancel(state.timer_ref)
+    :timer.kill_after(5000, state.cells_sup)
   end
 end
