@@ -9,7 +9,7 @@
     <span><%= @count %>🚩/<%= @total %>💣</span>
   </div>
 
-  <table class={if @ending, do: "end"}>
+  <table class={if @ending, do: "end"} phx-hook="MineField">
   <%= for row <- 1..@height do %>
     <tr>
     <%= for col <- 1..@width do %>

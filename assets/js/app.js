@@ -22,16 +22,21 @@ import {Socket} from 'phoenix';
 import {LiveSocket} from 'phoenix_live_view';
 import topbar from '../vendor/topbar';
 
+const NoContextMenu = el => {
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.cancelBubble = true;
+    return false;
+  });
+};
+
 const hooks = {};
 
 hooks.CellButton = {
   mounted() {
-    this.el.addEventListener('contextmenu', e => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      e.cancelBubble = true;
-      return false;
-    });
+    NoContextMenu(this.el);
+
     this.el.addEventListener('mouseup', e => {
       if (e.button == 0) {
         this.pushEventTo(e.target.attributes.getNamedItem('phx-target').value, 'reveal');
@@ -62,6 +67,12 @@ hooks.CellButton = {
         }, 200);
       }
     });
+  },
+};
+
+hooks.MineField = {
+  mounted() {
+    NoContextMenu(this.el);
   },
 };
 
