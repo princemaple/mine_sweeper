@@ -178,6 +178,7 @@ defmodule MineSweeper.GameServer do
     if time < state.time_limit do
       {:noreply, %{state | time: time}}
     else
+      Phoenix.PubSub.broadcast(MineSweeper.PubSub, state.slug, :lose)
       {:stop, :shutdown, %{state | time: time}}
     end
   end
