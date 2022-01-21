@@ -1,5 +1,9 @@
 # MineSweeper
 
+Most relevant code in
+- Game logic: https://github.com/princemaple/mine_sweeper/tree/main/lib/mine_sweeper
+- Game interaction and rendering: https://github.com/princemaple/mine_sweeper/tree/main/lib/mine_sweeper_web/live/session_live
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
