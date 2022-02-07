@@ -2,6 +2,7 @@
 
 - Game logic: https://github.com/princemaple/mine_sweeper/tree/main/lib/mine_sweeper
 - Game interaction and rendering: https://github.com/princemaple/mine_sweeper/tree/main/lib/mine_sweeper_web/live/session_live
+- Forum post: https://elixirforum.com/t/minesweeper-built-with-liveview-and-other-recent-tools/45266
 
 ## Run locally
 
